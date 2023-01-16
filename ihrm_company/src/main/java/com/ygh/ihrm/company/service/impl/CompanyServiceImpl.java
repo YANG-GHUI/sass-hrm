@@ -4,7 +4,6 @@ import com.ygh.ihrm.common.utils.IdWorker;
 import com.ygh.ihrm.company.dao.CompanyDao;
 import com.ygh.ihrm.company.service.CompanyService;
 import com.ygh.ihrm.domain.company.Company;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

@@ -1,12 +1,11 @@
 package com.ygh.ihrm.company.dao;
 
-import com.ygh.ihrm.domain.company.Company;
+import com.ygh.ihrm.domain.company.Department;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * 企业dao接口
+ * 部门dao接口
  */
-public interface CompanyDao extends JpaRepository<Company, String>, JpaSpecificationExecutor<Company> {
-
+public interface DepartmentDao extends JpaRepository<Department, String>, JpaSpecificationExecutor<Department> {
 }
