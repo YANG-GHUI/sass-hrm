@@ -83,7 +83,7 @@ public class Company implements Serializable {
     /**
      * 状态
      */
-    private Integer state;
+    private String state;
     /**
      * 当前余额
      */
