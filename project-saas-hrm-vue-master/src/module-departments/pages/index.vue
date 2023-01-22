@@ -35,7 +35,7 @@
                             </span>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                  <el-button type="text" @click="handlAdd('')">添加子部门</el-button>
+                                  <el-button type="text" @click="handleAdd()">添加子部门</el-button>
                                 </el-dropdown-item>
                               <el-dropdown-item>
                                 <el-button type="text" @click="handleList()">查看待分配员工</el-button>
@@ -46,7 +46,6 @@
                       </span>
               </div>
             </div>
-
             <!--
               构造树形列表
                 叶子 <i class="fa fa-male"></i>
@@ -63,16 +62,18 @@
                 default-expand-all
               >
                 <div class="generalClass" slot-scope="{node,data}" style="width:99%">
-      <span>
-        <span>{{ node.label }}</span>
-      </span>
+                  <span>
+                    <i v-if="node.isLeaf" class="fa fa-male"></i>
+                    <i v-else :class="node.expanded ? 'fa fa-minus-square-o':'fa fa-plus-square-o'"></i>
+                    <span>{{ node.label }}</span>
+                  </span>
                   <div class="fr">
-                  <span class="treeRinfo">
+                    <span class="treeRinfo">
                         <div class="treeRinfo">
-                          <span>{{ departData.companyManager }}</span>
-                          <span>在职  <em class="colGreen" title="在职人数">---</em>&nbsp;&nbsp;(<em class="colGreen"
-                                                                                               title="正式员工">---</em>&nbsp;/&nbsp;<em
-                            class="colRed" title="非正式员工">---</em>)</span>
+                          <span>{{ data.manager }}</span>
+                          <span>在职  <em class="colGreen" title="在职人数">---</em>&nbsp;&nbsp;(
+                            <em class="colGreen" title="正式员工">---</em>&nbsp;/&nbsp;
+                            <em class="colRed" title="非正式员工">---</em>)</span>
                         </div>
                         <div class="treeRinfo">
                           <el-dropdown class="item">
@@ -81,7 +82,13 @@
                             </span>
                             <el-dropdown-menu slot="dropdown">
                                 <el-dropdown-item>
-                                  <el-button type="text" @click="handlAdd('')">添加子部门</el-button>
+                                  <el-button type="text" @click="handleAdd(data.id)">添加子部门</el-button>
+                                </el-dropdown-item>
+                              <el-dropdown-item>
+                                  <el-button type="text" @click="handleUpdate(data.id)">查看该部门</el-button>
+                                </el-dropdown-item>
+                              <el-dropdown-item>
+                                  <el-button type="text" @click="handleRemove(data)">删除该部门</el-button>
                                 </el-dropdown-item>
                               <el-dropdown-item>
                                 <el-button type="text" @click="handleList()">查看待分配员工</el-button>
@@ -98,6 +105,26 @@
         </div>
       </el-card>
     </div>
+    <el-dialog title="新增部门" :visible.sync="dialogFormVisible">
+      <el-form label-position="left" :model="dept">
+        <el-form-item label="部门名称" :label-width="formLabelWidth">
+          <el-input v-model="dept.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="部门编码" :label-width="formLabelWidth">
+          <el-input v-model="dept.code" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="部门介绍" :label-width="formLabelWidth">
+          <el-input v-model="dept.introduce" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="部门负责人" :label-width="formLabelWidth">
+          <el-input v-model="dept.manager" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="closeDialog()">取 消</el-button>
+        <el-button type="primary" @click="saveDept()">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -111,7 +138,12 @@ export default {
     return {
       activeName: 'first',
       departData: {},
-      depts: []
+      depts: [],
+
+      pid: "",
+      dialogFormVisible: false,
+      formLabelWidth: "120px",
+      dept: {}
     }
   },
   methods: {
@@ -119,6 +151,52 @@ export default {
       list({companyId: companyId}).then(res => {
         this.departData = res.data.data
         this.depts = commonApi.transformTozTreeFormat(res.data.data.depts)
+      })
+    },
+    closeDialog() {
+      // 关闭弹窗
+      this.dialogFormVisible = false
+      // 清空表单
+      this.dept = {}
+    },
+    handleAdd(pid) {
+      this.pid = pid
+      this.dialogFormVisible = true
+    },
+    handleUpdate(id) {
+      this.dialogFormVisible = true
+      this.initDetail(id)
+    },
+    handleRemove(data) {
+      this.$confirm(
+        `本次操作将删除${data.name}，删除后不可恢复，确认删除吗？`
+      ).then(() => {
+        remove({id: data.id}).then(res => {
+          this.$message({
+            message: res.data.message,
+            type: res.data.success ? "success" : "error"
+          });
+          location.reload()
+        })
+      })
+    },
+    handleList() {
+
+    },
+    saveDept() {
+      this.dept.pid = this.pid
+      saveOrUpdate(this.dept).then(res => {
+        if (res.data.success) {
+          // 重新加载页面
+          location.reload()
+        }
+        // 关闭弹窗
+        this.closeDialog()
+      })
+    },
+    initDetail(id) {
+      detail({id: id}).then(res => {
+        this.dept = res.data.data
       })
     }
   },
@@ -172,6 +250,7 @@ export default {
   margin-left: -40px;
 }
 </style>
+
 <style rel="stylesheet/scss" lang="scss" scoped>
 .el-tree-node__expand-icon {
 

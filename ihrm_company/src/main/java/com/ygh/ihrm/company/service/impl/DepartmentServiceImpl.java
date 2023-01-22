@@ -53,8 +53,8 @@ public class DepartmentServiceImpl extends BaseService<Department> implements De
         if (department.getName() != null) {
             temp.setName(department.getName());
         }
-        if (department.getPid() != null) {
-            temp.setPid(department.getPid());
+        if (department.getManager() != null) {
+            temp.setManager(department.getManager());
         }
         departmentDao.save(temp);
     }
